@@ -1,0 +1,355 @@
+// SPDX-Lisans-Tanımlayıcısı: MIT
+pragma sağlamlığı =0.8.4;
+
+"@openzeppelin/contracts/token/ERC20/IERC20.sol" dosyasını içe aktarın;
+"@openzeppelin/contracts/access/Ownable.sol" dosyasını içe aktarın;
+"@openzeppelin/contracts/utils/math/SafeMath.sol" dosyasını içe aktarın;
+içe aktar "../BaseToken.sol";
+
+sözleşme StandardToken, IERC20, Ownable, BaseToken {
+    uint256 için SafeMath'i kullanma;
+
+    uint256 genel sabit SÜRÜM = 1;
+
+    eşleme(adres => uint256) özel _balances;
+    mapping(adres => mapping(adres => uint256)) private _allowances;
+
+    dize özel _adı;
+    string özel _symbol;
+    uint8 özel _ondalık sayılar;
+    uint256 özel _totalSupply;
+
+    kurucu(
+        dize bellek adı_,
+        dize bellek sembolü_,
+        uint8 ondalık sayılar_,
+        uint256 toplamTedarik_,
+        adres hizmetiÜcretAlıcı_,
+        uint256 hizmetÜcreti_
+    ) ödenecek {
+        _isim = isim_;
+        _sembol = sembol_;
+        _ondalık sayılar = ondalık sayılar_;
+        _mint(sahip(), toplamTedarik_);
+
+        yayar TokenCreated(owner(), address(this), TokenType.standard, VERSION);
+
+        ödenebilir(serviceFeeReceiver_).transfer(serviceFee_);
+    }
+
+    /**
+     * @dev Belirtecin adını döndürür.
+     */
+    işlev adı() genel görünüm sanal dönüşler (dize belleği) {
+        _name döndür;
+    }
+
+    /**
+     * @dev Belirtecin sembolünü döndürür, genellikle daha kısa bir sürümüdür.
+     * isim.
+     */
+    function symbol() genel görünüm sanal dönüşler (dize belleği) {
+        _symbol döndür;
+    }
+
+    /**
+     * @dev Kullanıcı gösterimini almak için kullanılan ondalık basamak sayısını döndürür.
+     * Örneğin, "ondalık sayılar" "2"ye eşitse, "505" belirteçleri dengesi
+     * kullanıcıya `5,05` (`505 / 10 ** 2`) olarak gösterilebilir.
+     *
+     * Belirteçler genellikle 18 değerini seçer ve aralarındaki ilişkiyi taklit eder.
+     * Eter ve Wei. {_setupDecimals} olmadığı sürece {ERC20}'nin kullandığı değer budur.
+     * aranan.
+     *
+     * NOT: Bu bilgi yalnızca _görüntüleme_ amacıyla kullanılır:
+     * hiçbir şekilde sözleşmenin aritmetiğini etkilemez.
+     * {IERC20-balanceOf} ve {IERC20-transfer}.
+     */
+    işlev ondalık sayıları () genel görünüm sanal dönüşler (uint8) {
+        _ondalık sayıları döndür;
+    }
+
+    /**
+     * @dev Bkz. {IERC20-totalSupply}.
+     */
+    function totalSupply() genel görünüm sanal geçersiz kılma döndürür (uint256) {
+        dönüş _totalSupply;
+    }
+
+    /**
+     * @dev Bkz. {IERC20-balanceOf}.
+     */
+    function BalanceOf(adres hesabı)
+        halka açık
+        görüş
+        sanal
+        geçersiz kılmak
+        döner (uint256)
+    {
+        iade _balances[hesap];
+    }
+
+    /**
+     * @dev Bkz. {IERC20-transferi}.
+     *
+     * Gereksinimler:
+     *
+     * - "alıcı" sıfır adresi olamaz.
+     * - arayan kişinin en az 'tutar' bakiyesi olmalıdır.
+     */
+    fonksiyon transferi(adres alıcısı, uint256 miktarı)
+        halka açık
+        sanal
+        geçersiz kılmak
+        döner (bool)
+    {
+        _transfer(_msgSender(), alıcı, miktar);
+        true döndür;
+    }
+
+    /**
+     * @dev Bkz. {IERC20-ödeneği}.
+     */
+    işlev ödeneği (adres sahibi, adres harcayan)
+        halka açık
+        görüş
+        sanal
+        geçersiz kılmak
+        döner (uint256)
+    {
+        iade _allowances[sahip][sömürücü];
+    }
+
+    /**
+     * @dev Bkz. {IERC20-onay}.
+     *
+     * Gereksinimler:
+     *
+     * - "harcayan" sıfır adresi olamaz.
+     */
+    işlevi onayla(harcanan adres, uint256 miktarı)
+        halka açık
+        sanal
+        geçersiz kılmak
+        döner (bool)
+    {
+        _approve(_msgSender(), harcayan, miktar);
+        true döndür;
+    }
+
+    /**
+     * @dev Bkz. {IERC20-transferFrom}.
+     *
+     * Güncellenmiş ödeneği gösteren bir {Onay} olayı yayar. Bu değil
+     * EIP tarafından gereklidir. {ERC20}'nin başındaki nota bakın.
+     *
+     * Gereksinimler:
+     *
+     * - "gönderen" ve "alıcı" sıfır adresi olamaz.
+     * - "gönderen" en az "tutar" bakiyesine sahip olmalıdır.
+     * - arayanın en az "gönderen" belirteçleri için ödeneği olmalıdır
+     * "miktar".
+     */
+    fonksiyon transferiFrom(
+        adres gönderen,
+        adres alıcısı,
+        uint256 miktarı
+    ) genel sanal geçersiz kılma dönüşleri (bool) {
+        _transfer(gönderici, alıcı, miktar);
+        _onaylamak(
+            gönderen,
+            _msgGönderici(),
+            _allowances[gönderici][_msgSender()].sub(
+                tutar,
+                "ERC20: transfer tutarı ödeneği aşıyor"
+            )
+        );
+        true döndür;
+    }
+
+    /**
+     * @dev Arayan tarafından "harcayan" kişiye verilen ödeneği atomik olarak artırır.
+     *
+     * Bu, aşağıdakiler için hafifletme olarak kullanılabilecek {onayla} seçeneğine bir alternatiftir:
+     * {IERC20-onay} bölümünde açıklanan sorunlar.
+     *
+     * Güncellenmiş ödeneği gösteren bir {Onay} olayı yayar.
+     *
+     * Gereksinimler:
+     *
+     * - "harcayan" sıfır adresi olamaz.
+     */
+    işlev artışıAllowance(adres harcayan, uint256 eklenenValue)
+        halka açık
+        sanal
+        döner (bool)
+    {
+        _onaylamak(
+            _msgGönderici(),
+            müsrif,
+            _allowances[_msgSender()][spender].add(addedValue)
+        );
+        true döndür;
+    }
+
+    /**
+     * @dev Arayan tarafından "harcayan" kişiye verilen ödeneği atomik olarak azaltır.
+     *
+     * Bu, aşağıdakiler için hafifletme olarak kullanılabilecek {onayla} seçeneğine bir alternatiftir:
+     * {IERC20-onay} bölümünde açıklanan sorunlar.
+     *
+     * Güncellenmiş ödeneği gösteren bir {Onay} olayı yayar.
+     *
+     * Gereksinimler:
+     *
+     * - "harcayan" sıfır adresi olamaz.
+     * - 'harcayan' en az arayan için ödenek olmalıdır
+     * 'çıkarılanValue'.
+     */
+    işlev azaltmaAllowance(adres harcayan, uint256 subtractedValue)
+        halka açık
+        sanal
+        döner (bool)
+    {
+        _onaylamak(
+            _msgGönderici(),
+            müsrif,
+            _allowances[_msgSender()][spender].sub(
+                çıkarılmışDeğer,
+                "ERC20: ödenek sıfırın altına düşürüldü"
+            )
+        );
+        true döndür;
+    }
+
+    /**
+     * @dev Belirteçleri "gönderici"den "alıcı"ya taşır.
+     *
+     * Bu dahili fonksiyon {transfer} işlevine eşdeğerdir ve şu amaçlarla kullanılabilir:
+     * örneğin, otomatik jeton ücretlerini, slashing mekanizmalarını vb. uygulayın.
+     *
+     * Bir {Transfer} olayı yayar.
+     *
+     * Gereksinimler:
+     *
+     * - "gönderen" sıfır adresi olamaz.
+     * - "alıcı" sıfır adresi olamaz.
+     * - "gönderen" en az "tutar" bakiyesine sahip olmalıdır.
+     */
+    işlev _aktarım(
+        adres gönderen,
+        adres alıcısı,
+        uint256 miktarı
+    ) dahili sanal {
+        require(sender != address(0), "ERC20: sıfır adresinden transfer");
+        require(alıcı !=adres(0), "ERC20: sıfır adrese transfer");
+
+        _beforeTokenTransfer(gönderen, alıcı, miktar);
+
+        _balances[gönderici] = _balances[gönderen].sub(
+            tutar,
+            "ERC20: transfer tutarı bakiyeyi aşıyor"
+        );
+        _balances[alıcı] = _balances[alıcı].add(tutar);
+        Transfer (gönderen, alıcı, miktar) yayar;
+    }
+
+    /** @dev 'tutar' belirteçleri oluşturur ve bunları artırarak 'hesaba' atar
+     * toplam arz.
+     *
+     * `from` sıfır adresine ayarlanmış bir {Transfer} olayı yayar.
+     *
+     * Gereksinimler:
+     *
+     * - `to` sıfır adresi olamaz.
+     */
+    function _mint(adres hesabı, uint256 miktarı) dahili sanal {
+        require(hesap !=adres(0), "ERC20: sıfır adrese nane");
+
+        _beforeTokenTransfer(adres (0), hesap, tutar);
+
+        _totalSupply = _totalSupply.add(tutar);
+        _balances[hesap] = _balances[hesap].add(tutar);
+        Transfer(adres (0), hesap, tutar);
+    }
+
+    /**
+     * @dev "hesaptan" "tutar" belirteçlerini yok eder,
+     * toplam arz.
+     *
+     * `to` sıfır adrese ayarlanmış bir {Transfer} olayı yayar.
+     *
+     * Gereksinimler:
+     *
+     * - "hesap" sıfır adresi olamaz.
+     * - "hesap" en az "miktar" belirtecine sahip olmalıdır.
+     */
+    function _burn(adres hesabı, uint256 miktarı) dahili sanal {
+        require(hesap !=adres(0), "ERC20: sıfır adresinden yaz");
+
+        _beforeTokenTransfer(hesap, adres (0), miktar);
+
+        _balances[hesap] = _balances[hesap].sub(
+            tutar,
+            "ERC20: yakma miktarı bakiyeyi aşıyor"
+        );
+        _totalSupply = _totalSupply.sub(tutar);
+        transfer (hesap, adres (0), tutar);
+    }
+
+    /**
+     * @dev "sahibinin" belirteçleri üzerinde "harcama" payı olarak "tutar"ı ayarlar.
+     *
+     * Bu dahili işlev "onayla"ya eşdeğerdir ve
+     * örneğin, belirli alt sistemler için otomatik izinler ayarlayın, vb.
+     *
+     * Bir {Onay} olayı yayar.
+     *
+     * Gereksinimler:
+     *
+     * - "sahip" sıfır adresi olamaz.
+     * - "harcayan" sıfır adresi olamaz.
+     */
+    işlev _onayla(
+        adres sahibi,
+        adres harcayan,
+        uint256 miktarı
+    ) dahili sanal {
+        require(sahip != address(0), "ERC20: sıfır adresinden onayla");
+        require(sender != address(0), "ERC20: sıfır adrese onayla");
+
+        _allowances[sahip][harcayan] = miktar;
+        Onay vermek (sahip, harcama yapan, miktar);
+    }
+
+    /**
+     * @dev {Ondalık sayıları}, varsayılan 18'den farklı bir değere ayarlar.
+     *
+     * UYARI: Bu fonksiyon sadece yapıcıdan çağrılmalıdır. Çoğu
+     * Belirteç sözleşmeleriyle etkileşime giren uygulamalar beklemez
+     * {ondalık sayılar} hiç değişmez ve değişirse yanlış çalışabilir.
+     */
+    function _setupDecimals(uint8 ondalık_) dahili sanal {
+        _ondalık sayılar = ondalık sayılar_;
+    }
+
+    /**
+     * Herhangi bir belirteç aktarımından önce çağrılan @dev Hook. Bu içerir
+     * darp ve yakma.
+     *
+     * Arama koşulları:
+     *
+     * - "from" ve "to"nun her ikisi de sıfır olmadığında, "from" belirteçlerinin "miktarı"
+     * 'to'ya aktarılacak.
+     * - "from" sıfır olduğunda, "to" için "tutar" belirteçleri basılacaktır.
+     * - 'to' sıfır olduğunda, 'from' tokenlarının 'miktarı' yakılacaktır.
+     * - "from" ve "to" asla ikisi birden sıfır değildir.
+     *
+     * Kancalar hakkında daha fazla bilgi edinmek için xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks] sayfasına gidin.
+     */
+    function _beforeTokenTransfer(
+        adres,
+        adresine,
+        uint256 miktarı
+    ) dahili sanal {}
+}
